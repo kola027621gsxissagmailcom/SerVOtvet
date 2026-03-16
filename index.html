@@ -791,79 +791,86 @@
         // ============================================
         // РАБОТА С ПОСТАМИ
         // ============================================
-        async function loadPosts() {
-            const mainContent = document.getElementById('mainContent');
-            mainContent.innerHTML = '<div class="loading">🌊 Загружаем волны...</div>';
+  async function loadPosts() {
+    const mainContent = document.getElementById('mainContent');
+    mainContent.innerHTML = '<div class="loading">🌊 Загружаем волны...</div>';
 
-            try {
-                const response = await fetch(`${API_URL}/posts`);
-                const posts = await response.json();
-                
-                postsData = posts;
-                lastPostCount = posts.length;
-
-                let html = '';
-                
-                if (currentUser) {
-                    html += `<button class="new-post-btn" onclick="showModal('newPostModal')">➕ СОЗДАТЬ ПОСТ</button>`;
-                }
-
-                if (posts.length === 0) {
-                    html += '<div class="loading">📭 Пока нет постов. Будь первым!</div>';
-                } else {
-                    html += '<div class="posts">';
-                    posts.forEach((post) => {
-                        const postClass = `post ${post.is_pinned ? 'pinned' : ''} ${post.is_locked ? 'locked' : ''}`;
-                        
-                        html += `
-                            <div class="${postClass}" data-post-id="${post.id}">
-                                <div class="vote-side">
-                                    <div class="vote-arrow">▲</div>
-                                    <div>${Math.floor(Math.random() * 100)}</div>
-                                    <div class="vote-arrow">▼</div>
-                                </div>
-                                <div class="post-content">
-                                    <div class="post-header">
-                                        <span class="post-author">🏄 ${escapeHtml(post.username)}</span>
-                                        <span>•</span>
-                                        <span>${new Date(post.created_at).toLocaleString('ru-RU')}</span>
-                                        <div class="post-badges">
-                                            ${post.is_pinned ? '<span class="badge pinned">📌 Закреплено</span>' : ''}
-                                            ${post.is_locked ? '<span class="badge locked">🔒 Закрыто</span>' : ''}
-                                        </div>
-                                    </div>
-                                    <div class="post-title" onclick="viewPost(${post.id})">
-                                        ${escapeHtml(post.title)}
-                                    </div>
-                                    <div class="post-content-preview">
-                                        ${escapeHtml(post.content.substring(0, 150))}${post.content.length > 150 ? '...' : ''}
-                                    </div>
-                                    <div class="post-meta">
-                                        <span>💬 <a href="#" onclick="viewPost(${post.id}); return false;">${post.comments_count || 0} комментариев</a></span>
-                                        ${currentUser && (currentUser.id === post.user_id || isAdmin()) ? `
-                                            <span>✏️ <a href="#" onclick="editPost(${post.id}); return false;">Редактировать</a></span>
-                                        ` : ''}
-                                    </div>
-                                </div>
-                                ${isAdmin() ? `
-                                    <div style="position: absolute; top: 10px; right: 10px;">
-                                        <button class="admin-btn small" onclick="pinPost(${post.id}, ${!post.is_pinned})">📌</button>
-                                        <button class="admin-btn small" onclick="lockPost(${post.id}, ${!post.is_locked})">🔒</button>
-                                        <button class="admin-btn small danger" onclick="deletePost(${post.id})">🗑️</button>
-                                    </div>
-                                ` : ''}
-                            </div>
-                        `;
-                    });
-                    html += '</div>';
-                }
-
-                mainContent.innerHTML = html;
-            } catch (error) {
-                console.error('Ошибка загрузки:', error);
-                mainContent.innerHTML = `<div class="loading">❌ Ошибка: ${error.message}</div>`;
+    try {
+        const response = await fetch(`${API_URL}/posts`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ошибка! статус: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        // ✅ ЗАЩИТА: проверяем, что data - массив
+        const posts = Array.isArray(data) ? data : [];
+        
+        if (!Array.isArray(data)) {
+            console.warn('Сервер вернул не массив. Вот что пришло:', data);
+            // Если пришла ошибка, показываем её
+            if (data.error) {
+                mainContent.innerHTML = `<div class="loading">❌ Ошибка сервера: ${data.error}</div>`;
+                return;
             }
         }
+        
+        postsData = posts;
+        lastPostCount = posts.length;
+
+        let html = '';
+        
+        if (currentUser) {
+            html += `<button class="new-post-btn" onclick="showModal('newPostModal')">➕ СОЗДАТЬ ПОСТ</button>`;
+        }
+
+        if (posts.length === 0) {
+            html += '<div class="loading">📭 Пока нет постов. Будь первым!</div>';
+        } else {
+            html += '<div class="posts">';
+            posts.forEach((post) => {
+                const postClass = `post ${post.is_pinned ? 'pinned' : ''} ${post.is_locked ? 'locked' : ''}`;
+                
+                html += `
+                    <div class="${postClass}" data-post-id="${post.id}">
+                        <div class="vote-side">
+                            <div class="vote-arrow">▲</div>
+                            <div>${Math.floor(Math.random() * 100)}</div>
+                            <div class="vote-arrow">▼</div>
+                        </div>
+                        <div class="post-content">
+                            <div class="post-header">
+                                <span class="post-author">🏄 ${escapeHtml(post.username)}</span>
+                                <span>•</span>
+                                <span>${new Date(post.created_at).toLocaleString('ru-RU')}</span>
+                                <div class="post-badges">
+                                    ${post.is_pinned ? '<span class="badge pinned">📌 Закреплено</span>' : ''}
+                                    ${post.is_locked ? '<span class="badge locked">🔒 Закрыто</span>' : ''}
+                                </div>
+                            </div>
+                            <div class="post-title" onclick="viewPost(${post.id})">
+                                ${escapeHtml(post.title)}
+                            </div>
+                            <div class="post-content-preview">
+                                ${escapeHtml(post.content.substring(0, 150))}${post.content.length > 150 ? '...' : ''}
+                            </div>
+                            <div class="post-meta">
+                                <span>💬 <a href="#" onclick="viewPost(${post.id}); return false;">${post.comments_count || 0} комментариев</a></span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+        }
+
+        mainContent.innerHTML = html;
+    } catch (error) {
+        console.error('ДЕТАЛЬНАЯ ОШИБКА:', error);
+        mainContent.innerHTML = `<div class="loading">❌ Ошибка: ${error.message}<br>Статус сервера: ${error.status || 'неизвестен'}</div>`;
+    }
+}
 
         async function checkForUpdates() {
             try {
