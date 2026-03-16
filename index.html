@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SerVOtvet - волна ответов 🌊</title>
+    <style>
+        /* ===== ОСНОВНЫЕ СТИЛИ ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            color: white;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Анимированные волны на фоне */
+        .ocean {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 150px;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.2" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,154.7C960,171,1056,181,1152,165.3C1248,149,1344,107,1392,85.3L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
+            background-repeat: repeat-x;
+            background-size: cover;
+            animation: wave 15s linear infinite;
+            z-index: -1;
+        }
+
+        @keyframes wave {
+            0% { background-position: 0 0; }
+            100% { background-position: 1440px 0; }
+        }
+
+        /* Контейнер для контента */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ===== ШАПКА САЙТА ===== */
+        header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .logo h1 {
+            font-size: 2.8em;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.4);
+            color: #ffd700;
+        }
+
+        .logo p {
+            font-style: italic;
+            opacity: 0.9;
+            font-size: 1.1em;
+            letter-spacing: 2px;
+        }
+
+        /* Кнопки авторизации */
+        .auth-buttons button, .user-info button {
+            background: rgba(255,255,255,0.15);
+            border: 2px solid white;
+            color: white;
+            padding: 10px 25px;
+            margin-left: 12px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s;
+            backdrop-filter: blur(5px);
+        }
+
+        .auth-buttons button:hover, .user-info button:hover {
+            background: white;
+            color: #1e3c72;
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(255,255,255,0.3);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-info span {
+            font-weight: bold;
+            font-size: 1.3em;
+            color: #ffd700;
+        }
+
+        /* ===== КНОПКА СОЗДАНИЯ ПОСТА ===== */
+        .new-post-btn {
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            border: none;
+            color: #1e3c72;
+            padding: 18px 35px;
+            border-radius: 50px;
+            font-size: 1.3em;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 35px;
+            width: 100%;
+            transition: all 0.3s;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            border: 2px solid rgba(255,255,255,0.3);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .new-post-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 15px 30px rgba(255,215,0,0.4);
+        }
+
+        /* ===== КАРТОЧКИ ПОСТОВ ===== */
+        .posts {
+            display: grid;
+            gap: 25px;
+        }
+
+        .post {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.3s;
+        }
+
+        .post:hover {
+            transform: translateX(15px);
+            background: rgba(255,255,255,0.15);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+        }
+
+        .post-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(255,215,0,0.3);
+        }
+
+        .post-title {
+            font-size: 1.6em;
+            color: #ffd700;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .post-title:hover {
+            text-decoration: underline;
+        }
+
+        .post-author {
+            background: rgba(255,215,0,0.2);
+            padding: 5px 15px;
+            border-radius: 30px;
+            font-weight: bold;
+            color: #87CEEB;
+        }
+
+        .post-content {
+            margin: 15px 0;
+            line-height: 1.8;
+            font-size: 1.1em;
+            color: rgba(255,255,255,0.95);
+        }
+
+        .post-footer {
+            display: flex;
+            gap: 25px;
+            color: rgba(255,255,255,0.7);
+            font-size: 0.95em;
+            margin-top: 15px;
+        }
+
+        .post-footer a {
+            color: #ffd700;
+            text-decoration: none;
+        }
+
+        .post-footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* ===== МОДАЛЬНЫЕ ОКНА ===== */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            color: #333;
+            padding: 35px;
+            border-radius: 30px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+        }
+
+        .modal-content h2 {
+            margin-bottom: 25px;
+            color: #1e3c72;
+            font-size: 2em;
+            text-align: center;
+        }
+
+        .modal-content input,
+        .modal-content textarea {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .modal-content input:focus,
+        .modal-content textarea:focus {
+            border-color: #1e3c72;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(30,60,114,0.2);
+        }
+
+        .modal-content textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .modal-content button {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            width: 100%;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+
+        .modal-content button:hover {
+            transform: scale(1.02);
+            box-shadow: 0 10px 20px rgba(30,60,114,0.4);
+        }
+
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 30px;
+            cursor: pointer;
+            color: #999;
+            transition: all 0.3s;
+        }
+
+        .close:hover {
+            color: #333;
+            transform: rotate(90deg);
+        }
+
+        /* ===== КОММЕНТАРИИ ===== */
+        .comments-section {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 2px solid #e0e0e0;
+        }
+
+        .comment {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #ffd700;
+        }
+
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+            color: #1e3c72;
+            font-weight: bold;
+        }
+
+/* ===== ИСПРАВЛЕННЫЕ КОММЕНТАРИИ ===== */
+.add-comment {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    align-items: center;
+}
+
+.add-comment input {
+    flex: 10;  /* Поле ввода занимает 10 частей */
+    padding: 12px 20px;
+    border: 2px solid #e0e0e0;
+    border-radius: 30px;
+    font-size: 16px;
+    min-width: 0;  /* Важно для flexbox */
+}
+
+.add-comment button {
+    flex: 1;  /* Кнопка занимает 1 часть */
+    background: #4CAF50;
+    color: white;
+    border: none;
+    padding: 12px 15px;
+    border-radius: 30px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s;
+    white-space: nowrap;  /* Текст не переносится */
+    font-size: 16px;
+}
+
+.add-comment button:hover {
+    background: #45a049;
+    transform: scale(1.02);
+}
+
+        /* Загрузка */
+        .loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 1.5em;
+            color: #ffd700;
+        }
+    </style>
+</head>
+<body>
+    <div class="ocean"></div>
+    
+    <div class="container">
+        <!-- ШАПКА -->
+        <header>
+            <div class="logo">
+                <h1>🌊 SerVOtvet</h1>
+                <p>волна ответов</p>
+            </div>
+            <div class="auth-buttons" id="authButtons">
+                <button onclick="showModal('loginModal')">🚪 Войти</button>
+                <button onclick="showModal('registerModal')">📝 Регистрация</button>
+            </div>
+            <div class="user-info" id="userInfo" style="display: none;">
+                <span>🏄 <span id="currentUsername"></span></span>
+                <button onclick="logout()">👋 Выйти</button>
+            </div>
+        </header>
+
+        <!-- ОСНОВНОЙ КОНТЕНТ -->
+        <main id="mainContent">
+            <div class="loading">🌊 Загружаем волны...</div>
+        </main>
+    </div>
+
+    <!-- ===== МОДАЛЬНЫЕ ОКНА ===== -->
+
+    <!-- Вход -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('loginModal')">&times;</span>
+            <h2>🌊 Вход в океан</h2>
+            <input type="text" id="loginUsername" placeholder="Имя пользователя">
+            <input type="password" id="loginPassword" placeholder="Пароль">
+            <button onclick="login()">Войти</button>
+        </div>
+    </div>
+
+    <!-- Регистрация -->
+    <div class="modal" id="registerModal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('registerModal')">&times;</span>
+            <h2>📝 Создать волну</h2>
+            <input type="text" id="regUsername" placeholder="Имя пользователя">
+            <input type="password" id="regPassword" placeholder="Пароль">
+            <button onclick="register()">Зарегистрироваться</button>
+        </div>
+    </div>
+
+    <!-- Новый пост -->
+    <div class="modal" id="newPostModal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('newPostModal')">&times;</span>
+            <h2>🌊 Новая волна</h2>
+            <input type="text" id="postTitle" placeholder="Заголовок вопроса">
+            <textarea id="postContent" placeholder="Напиши свой вопрос подробно..."></textarea>
+            <button onclick="createPost()">Опубликовать</button>
+        </div>
+    </div>
+
+    <!-- Просмотр поста -->
+    <div class="modal" id="viewPostModal">
+        <div class="modal-content" style="max-width: 700px;">
+            <span class="close" onclick="closeModal('viewPostModal')">&times;</span>
+            <div id="postViewContent"></div>
+        </div>
+    </div>
+
+    <!-- ===== СКРИПТЫ ===== -->
+    <script>
+        // ============================================
+        // НАСТРОЙКИ
+        // ============================================
+        
+        // ⚠️ ВАЖНО: ЗАМЕНИ ЭТОТ АДРЕС НА СВОЙ ПОСЛЕ ДЕПЛОЯ!
+        const API_URL = 'https://servotvet.eu.pythonanywhere.com/api';
+        // После деплоя на PythonAnywhere будет:
+        // const API_URL = 'https://твой-username.pythonanywhere.com/api';
+
+        // ============================================
+        // ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ
+        // ============================================
+        
+        let currentUser = null;  // Текущий пользователь
+
+        // ============================================
+        // ЗАГРУЗКА ПРИ СТАРТЕ
+        // ============================================
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAuth();
+            loadPosts();
+        });
+
+        // ============================================
+        // РАБОТА С МОДАЛЬНЫМИ ОКНАМИ
+        // ============================================
+        
+        function showModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // ============================================
+        // АВТОРИЗАЦИЯ
+        // ============================================
+        
+        function checkAuth() {
+            const savedUser = localStorage.getItem('servotvet_user');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                document.getElementById('authButtons').style.display = 'none';
+                document.getElementById('userInfo').style.display = 'flex';
+                document.getElementById('currentUsername').textContent = currentUser.username;
+            }
+        }
+
+        async function register() {
+            const username = document.getElementById('regUsername').value.trim();
+            const password = document.getElementById('regPassword').value.trim();
+
+            if (!username || !password) {
+                alert('❌ Заполни все поля!');
+                return;
+            }
+
+            if (password.length < 3) {
+                alert('❌ Пароль должен быть минимум 3 символа');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/register`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({username, password})
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('✅ Регистрация успешна! Теперь войди.');
+                    closeModal('registerModal');
+                    document.getElementById('regUsername').value = '';
+                    document.getElementById('regPassword').value = '';
+                } else {
+                    alert('❌ ' + data.message);
+                }
+            } catch (error) {
+                alert('❌ Ошибка подключения к серверу! Проверь API_URL');
+                console.error(error);
+            }
+        }
+
+        async function login() {
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+
+            if (!username || !password) {
+                alert('❌ Заполни все поля!');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/login`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({username, password})
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentUser = data.user;
+                    localStorage.setItem('servotvet_user', JSON.stringify(currentUser));
+                    
+                    document.getElementById('authButtons').style.display = 'none';
+                    document.getElementById('userInfo').style.display = 'flex';
+                    document.getElementById('currentUsername').textContent = currentUser.username;
+                    
+                    closeModal('loginModal');
+                    document.getElementById('loginUsername').value = '';
+                    document.getElementById('loginPassword').value = '';
+                    
+                    loadPosts(); // Перезагружаем посты
+                } else {
+                    alert('❌ ' + data.message);
+                }
+            } catch (error) {
+                alert('❌ Ошибка подключения к серверу! Проверь API_URL');
+                console.error(error);
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('servotvet_user');
+            currentUser = null;
+            document.getElementById('authButtons').style.display = 'flex';
+            document.getElementById('userInfo').style.display = 'none';
+            loadPosts();
+        }
+
+        // ============================================
+        // РАБОТА С ПОСТАМИ
+        // ============================================
+        
+        async function loadPosts() {
+            const mainContent = document.getElementById('mainContent');
+            mainContent.innerHTML = '<div class="loading">🌊 Загружаем волны...</div>';
+
+            try {
+                const response = await fetch(`${API_URL}/posts`);
+                const posts = await response.json();
+
+                let html = '';
+                
+                if (currentUser) {
+                    html += `<button class="new-post-btn" onclick="showModal('newPostModal')">➕ ЗАДАТЬ ВОПРОС</button>`;
+                }
+
+                if (posts.length === 0) {
+                    html += '<div class="loading">📭 Пока нет вопросов. Будь первым!</div>';
+                } else {
+                    html += '<div class="posts">';
+                    posts.forEach(post => {
+                        html += `
+                            <div class="post">
+                                <div class="post-header">
+                                    <span class="post-title" onclick="viewPost(${post.id})">${escapeHtml(post.title)}</span>
+                                    <span class="post-author">🏄 ${escapeHtml(post.username)}</span>
+                                </div>
+                                <div class="post-content">${escapeHtml(post.content.substring(0, 200))}${post.content.length > 200 ? '...' : ''}</div>
+                                <div class="post-footer">
+                                    <span>📅 ${new Date(post.created_at).toLocaleString('ru-RU')}</span>
+                                    <span>💬 <a href="#" onclick="viewPost(${post.id}); return false;">Читать ответы</a></span>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                }
+
+                mainContent.innerHTML = html;
+            } catch (error) {
+                mainContent.innerHTML = `
+                    <div class="loading" style="color: #ff6b6b;">
+                        ❌ Ошибка загрузки<br>
+                        <small>${error}</small><br>
+                        <br>
+                        Проверь:<br>
+                        1. Запущен ли сервер (python servotvet_server.py)<br>
+                        2. Правильный ли адрес в API_URL (сейчас: ${API_URL})<br>
+                        3. Нет ли ошибок в консоли (F12)
+                    </div>
+                `;
+                console.error(error);
+            }
+        }
+
+        async function createPost() {
+            if (!currentUser) {
+                alert('❌ Сначала войди!');
+                return;
+            }
+
+            const title = document.getElementById('postTitle').value.trim();
+            const content = document.getElementById('postContent').value.trim();
+
+            if (!title || !content) {
+                alert('❌ Заполни все поля!');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/posts`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        title,
+                        content,
+                        user_id: currentUser.id,
+                        username: currentUser.username
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    closeModal('newPostModal');
+                    document.getElementById('postTitle').value = '';
+                    document.getElementById('postContent').value = '';
+                    loadPosts();
+                    alert('✅ Вопрос опубликован!');
+                } else {
+                    alert('❌ ' + (data.message || 'Ошибка'));
+                }
+            } catch (error) {
+                alert('❌ Ошибка: ' + error);
+            }
+        }
+
+        // ============================================
+        // РАБОТА С КОММЕНТАРИЯМИ
+        // ============================================
+        
+        async function viewPost(postId) {
+            try {
+                // Получаем все посты
+                const postsResponse = await fetch(`${API_URL}/posts`);
+                const posts = await postsResponse.json();
+                const post = posts.find(p => p.id === postId);
+                
+                if (!post) {
+                    alert('Пост не найден!');
+                    return;
+                }
+
+                // Получаем комментарии
+                const commentsResponse = await fetch(`${API_URL}/comments/${postId}`);
+                const comments = await commentsResponse.json();
+
+                let html = `
+                    <h2 style="color: #1e3c72;">${escapeHtml(post.title)}</h2>
+                    <p style="color: #666;">
+                        <small>Автор: 🏄 ${escapeHtml(post.username)} | 
+                        ${new Date(post.created_at).toLocaleString('ru-RU')}</small>
+                    </p>
+                    <div style="margin: 25px 0; padding: 20px; background: #f8f9fa; border-radius: 15px; line-height: 1.6;">
+                        ${escapeHtml(post.content).replace(/\n/g, '<br>')}
+                    </div>
+                    
+                    <h3 style="color: #1e3c72; margin-top: 25px;">🌊 Ответы (${comments.length})</h3>
+                    <div id="commentsList">
+                `;
+
+                if (comments.length === 0) {
+                    html += '<p style="color: #999; text-align: center; padding: 20px;">Пока нет ответов. Будь первым!</p>';
+                } else {
+                    comments.forEach(comment => {
+                        html += `
+                            <div class="comment">
+                                <div class="comment-header">
+                                    <span>🏄 ${escapeHtml(comment.username)}</span>
+                                    <span>${new Date(comment.created_at).toLocaleString('ru-RU')}</span>
+                                </div>
+                                <div>${escapeHtml(comment.content)}</div>
+                            </div>
+                        `;
+                    });
+                }
+
+                html += '</div>';
+
+                if (currentUser) {
+                    html += `
+                        <div class="add-comment">
+                            <input type="text" id="newComment" placeholder="Напиши ответ...">
+                            <button onclick="addComment(${postId})">Ответить</button>
+                        </div>
+                    `;
+                }
+
+                document.getElementById('postViewContent').innerHTML = html;
+                showModal('viewPostModal');
+            } catch (error) {
+                alert('❌ Ошибка загрузки: ' + error);
+            }
+        }
+
+        async function addComment(postId) {
+            if (!currentUser) return;
+
+            const content = document.getElementById('newComment').value.trim();
+            if (!content) {
+                alert('Напиши ответ!');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/comments`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        content,
+                        post_id: postId,
+                        user_id: currentUser.id,
+                        username: currentUser.username
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('newComment').value = '';
+                    viewPost(postId); // Перезагружаем пост
+                } else {
+                    alert('❌ ' + (data.message || 'Ошибка'));
+                }
+            } catch (error) {
+                alert('❌ Ошибка: ' + error);
+            }
+        }
+
+        // ============================================
+        // ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+        // ============================================
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
