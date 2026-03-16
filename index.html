@@ -537,27 +537,36 @@
         // ============================================
         // ПРОВЕРКА ОБНОВЛЕНИЙ (каждые 2 секунды)
         // ============================================
-        async function checkForUpdates() {
-            try {
-                const response = await fetch(`${API_URL}/posts`);
-                const posts = await response.json();
-                
-                if (posts.length !== lastPostCount && lastPostCount !== 0) {
-                    // Появились новые посты!
-                    updateIndicator.classList.add('show');
-                    setTimeout(() => {
-                        updateIndicator.classList.remove('show');
-                    }, 2000);
-                    
-                    // Обновляем страницу
-                    loadPosts();
-                }
-                
-                lastPostCount = posts.length;
-            } catch (error) {
-                console.log('Ошибка проверки обновлений:', error);
-            }
+async function checkForUpdates() {
+    try {
+        // ВРЕМЕННО: используем прямой адрес для проверки
+        const response = await fetch('https://servotvet.eu.pythonanywhere.com/api/posts');
+        
+        if (!response.ok) {
+            console.log('Статус ответа:', response.status);
+            return;
         }
+        
+        const text = await response.text();
+        console.log('Первые 50 символов ответа:', text.substring(0, 50));
+        
+        // Пробуем распарсить
+        const posts = JSON.parse(text);
+        
+        if (posts.length !== lastPostCount && lastPostCount !== 0) {
+            updateIndicator.classList.add('show');
+            setTimeout(() => {
+                updateIndicator.classList.remove('show');
+            }, 2000);
+            loadPosts();
+        }
+        
+        lastPostCount = posts.length;
+    } catch (error) {
+        console.log('Ошибка проверки обновлений:', error.message);
+        console.log('Полный текст ошибки:', error);
+    }
+}
 
         // ============================================
         // РАБОТА С МОДАЛЬНЫМИ ОКНАМИ
