@@ -673,65 +673,20 @@ async function loadPosts() {
     mainContent.innerHTML = '<div class="loading">🌊 Загружаем волны...</div>';
 
     try {
-        console.log('Загружаем посты с:', `${API_URL}/posts`); // Отладка
+        // Жёстко прописываем адрес
+        const response = await fetch('https://servotvet.eu.pythonanywhere.com/api/posts');
         
-        const response = await fetch(`${API_URL}/posts`);
-        console.log('Статус ответа:', response.status); // Отладка
+        console.log('СТАТУС:', response.status);
         
-        if (!response.ok) {
-            throw new Error(`HTTP ошибка! статус: ${response.status}`);
-        }
+        const text = await response.text();
+        console.log('ТЕКСТ ОТВЕТА (первые 200 символов):', text.substring(0, 200));
         
-        const text = await response.text(); // Сначала получим как текст
-        console.log('Полученный текст:', text.substring(0, 100)); // Отладка
+        // Показываем текст на странице
+        mainContent.innerHTML = `<pre style="color: white; background: black; padding: 20px;">${escapeHtml(text)}</pre>`;
         
-        const posts = JSON.parse(text); // Потом распарсим
-        
-        console.log('Распарсенные посты:', posts); // Отладка
-        
-        lastPostCount = posts.length;
-
-        let html = '';
-        
-        if (currentUser) {
-            html += `<button class="new-post-btn" onclick="showModal('newPostModal')">➕ СОЗДАТЬ ПОСТ</button>`;
-        }
-
-        if (posts.length === 0) {
-            html += '<div class="loading">📭 Пока нет постов. Будь первым!</div>';
-        } else {
-            html += '<div class="posts">';
-            posts.forEach((post) => {
-                html += `
-                    <div class="post">
-                        <div class="vote-side">
-                            <div class="vote-arrow">▲</div>
-                            <div>${Math.floor(Math.random() * 100)}</div>
-                            <div class="vote-arrow">▼</div>
-                        </div>
-                        <div class="post-content">
-                            <div class="post-header">
-                                <span class="post-author">🏄 ${escapeHtml(post.username)}</span>
-                                <span>•</span>
-                                <span>${new Date(post.created_at).toLocaleString('ru-RU')}</span>
-                            </div>
-                            <div class="post-title" onclick="viewPost(${post.id})">
-                                ${escapeHtml(post.title)}
-                            </div>
-                            <div class="post-meta">
-                                <span>💬 <a href="#" onclick="viewPost(${post.id}); return false;">комментарии</a></span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-            html += '</div>';
-        }
-
-        mainContent.innerHTML = html;
     } catch (error) {
-        console.error('ДЕТАЛЬНАЯ ОШИБКА:', error);
-        mainContent.innerHTML = `<div class="loading">❌ Ошибка: ${error.message}<br>Проверь консоль (F12)</div>`;
+        console.error('ОШИБКА:', error);
+        mainContent.innerHTML = `<div class="loading">❌ Ошибка: ${error.message}</div>`;
     }
 }
 
