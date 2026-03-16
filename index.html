@@ -1353,30 +1353,34 @@
             }
         }
 
-        async function deletePost(postId) {
-            if (!confirm('Удалить пост?')) return;
+ async function deletePost(postId) {
+    if (!confirm('Удалить пост?')) return;
 
-            try {
-                const response = await fetch(`${API_URL}/admin/posts/${postId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Authorization': `Bearer ${currentUser.id}`
-                    }
-                });
+    try {
+        const response = await fetch(`${API_URL}/admin/posts/${postId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${currentUser.id}`
+            }
+        });
 
-                const data = await response.json();
-                alert(data.message);
-                if (data.success) {
-                    loadPosts();
-                    if (document.getElementById('adminModal')) {
-                        closeModal('adminModal');
-                        showAdminPanel();
-                    }
-                }
-            } catch (error) {
-                alert('❌ Ошибка: ' + error);
+        const data = await response.json();
+        alert(data.message);
+        
+        if (data.success) {
+            // ✅ Обновляем список постов
+            await loadPosts();
+            
+            // ✅ Если открыта админ-панель, обновляем её
+            if (document.getElementById('adminModal')) {
+                closeModal('adminModal');
+                showAdminPanel(); // Открываем заново
             }
         }
+    } catch (error) {
+        alert('❌ Ошибка: ' + error);
+    }
+}
 
         async function deleteAllPosts() {
             if (!confirm('ТОЧНО удалить ВСЕ посты?! Это необратимо!')) return;
